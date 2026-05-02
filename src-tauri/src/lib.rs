@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -11,15 +9,14 @@ fn git_status(path : &str) -> String {
     use std::process::Command;
 
     let output = Command::new("git")
-                .arg("-C")
-                .arg(path)
-                .arg("status")
-                .output();
+        .arg("-C")
+        .arg(path)
+        .arg("status")
+        .arg("--porcelain")
+        .output()
+        .expect("failed to execute git");
 
-    match output {
-        Ok(out) => String::from_utf8_lossy(&out.stdout).to_string(),
-        Err(e) => format!("Error: {}", e),
-    }
+    String::from_utf8_lossy(&output.stdout).to_string()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
