@@ -9,7 +9,7 @@ function GitFileList( {files} : Props ) {
   if (files.length === 0) {
     return <p>No changes</p>;
   }
-
+  
   return (
     <ul>
         {files.map((file) => {

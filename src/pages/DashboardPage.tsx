@@ -1,31 +1,18 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useState } from 'react'
-import { parseGitStatus } from '../features/git/model/gitStatusParser';
-import GitFileList from '../features/git/components/GitFileList';
-import { GitFileStatus } from '../features/git/model/gitTypes';
-import { getGitStatus } from '../features/git/api';
-import { GitStatusButton } from '../features/git/components/GitStatusButton';
+import { useActiveTab } from "../features/git/hooks/ActiveTabContext";
+import { TABS } from "../features/git/model/gitTypes";
 
 const Dashboard = () => {
-
-  const [files, setFiles] = useState<GitFileStatus[]>([]);
-
-  const repoPath = "/Users/kostapolin/Pet-Projects/GITPulse/gitpulse-app";
-
-  async function handleGitStatus() {
-    const output = await getGitStatus(repoPath);
-    const parsed = parseGitStatus(output);
-    setFiles(parsed);
-  }
-
+  const {setActiveTab} = useActiveTab();
 
   return (
     <div>
-      <h1>Git Pulse</h1>
-
-      <GitStatusButton onClick={handleGitStatus}/>
-
-      <GitFileList files={files}/>
+      <div className="repo_container">
+        <h1>Your active repositories: 5</h1>
+        <div className="repo_item">my_repo_1</div>
+        <div className="repo_item">my_repo_2</div>
+        <div className="repo_item">my_repo_3</div>
+        <button onClick={() => {setActiveTab(TABS.REPOS_PAGE)}}>show more..</button>
+      </div>
     </div>
   )
 }

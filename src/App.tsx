@@ -1,12 +1,16 @@
 // import "./App.css";
 import "./styles/reset.css"
 import "./styles/global.css"
-import Dashboard from "./pages/DashboardPage";
+import AppLayout from "./app/appLayout";
+import { ActiveTabProvider } from "./features/git/hooks/ActiveTabContext";
 
 function App() {
   
   return (
-    <Dashboard/>
+    <ActiveTabProvider>
+      <AppLayout/>
+    </ActiveTabProvider>
+
   );
 }
 
