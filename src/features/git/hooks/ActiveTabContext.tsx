@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from 'react'
-import {ActiveTabContextValue, Tab} from "../features/git/model/gitTypes"
+import { ActiveTabContextValue, Tab } from '../model/gitTypes';
 
 export const ActiveTabContext = createContext<ActiveTabContextValue | null>(null);
 

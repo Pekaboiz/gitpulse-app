@@ -46,6 +46,10 @@ const ReposPage = () => {
         path,
       });
 
+      await invoke("save_repository", {
+        repositoryPath: verifiedPath,
+      });
+
       setRepoPath(verifiedPath);
       setRepoError("");
       setFiles([]);
