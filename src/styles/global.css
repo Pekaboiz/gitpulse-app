@@ -86,4 +86,5 @@ color: #f87171;
 button.active {
     background-color: var(--text);
     color: var(--accent);
+    color: var(--accent);
 }
