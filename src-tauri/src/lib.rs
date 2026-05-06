@@ -37,6 +37,7 @@ fn repositories_file_path(app : &tauri::AppHandle) -> Result<std::path::PathBuf,
 
 #[derive(Serialize, Deserialize, Clone)]
 struct Repository {
+    name : String,
     path : String,
 }
 
@@ -59,7 +60,7 @@ async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Res
                             .any(|repository| repository.path == repository_path);
 
     if !already_exists {
-        repositories.push(Repository {path : repository_path});
+        repositories.push(Repository {name : "".to_string(), path : repository_path});
     }
 
     let json = serde_json::to_string_pretty(&repositories)

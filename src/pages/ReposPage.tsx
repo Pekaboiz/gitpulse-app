@@ -64,11 +64,11 @@ const ReposPage = () => {
     <div>
       <h1>Git Pulse</h1>
 
+      <input id='git_input' value={`~${repoPath}`} className="git_input" placeholder='~/choosen_path'/>
       <Button onClick={selectRepo} label='Choose file'/>
 
       {repoPath.length > 0 &&
       <div className="repo_item">
-        <p>Selected repo: {repoPath}</p>
         <GitStatusButton onClick={handleGitStatus}/>
         <GitFileList files={files}/>
       </div>
