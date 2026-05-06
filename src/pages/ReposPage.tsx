@@ -7,6 +7,7 @@ import { GitStatusButton } from '../features/git/components/GitStatusButton';
 import Button from '../features/git/components/UI/Button';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from "@tauri-apps/api/core";
+import GitCommit from '../features/git/components/GitCommit';
 
 const ReposPage = () => {
 
@@ -69,8 +70,11 @@ const ReposPage = () => {
 
       {repoPath.length > 0 &&
       <div className="repo_item">
+        <p>Actions</p>
+        <GitCommit/>
         <GitStatusButton onClick={handleGitStatus}/>
         <GitFileList files={files}/>
+        
       </div>
       }
 

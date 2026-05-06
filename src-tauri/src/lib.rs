@@ -1,5 +1,27 @@
+use std::{path::Path};
+
+use serde_json::to_string;
 use tauri::Manager;
 use serde::{Deserialize, Serialize};
+
+#[tauri::command]
+fn git_commit(commit_msg : String) -> Result<(), String> {
+    let add = std::process::Command::new("git")
+                    .args(["add", "."])
+                    .output()
+                    .map_err(|error| error.to_string());
+
+    let commit = std::process::Command::new("git")
+                    .args(["commit", "-", "${commit_msg}"])
+                    .output()
+                    .map_err(|error| error.to_string());
+    
+    let push = std::process::Command::new("git")
+                    .args(["push", "-u", "origin", "main"])
+                    .output()
+                    .map_err(|error| error.to_string());
+    Ok(())
+}
 
 #[tauri::command]
 fn verify_repository(path: String) -> Result<String, String> {
@@ -60,7 +82,8 @@ async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Res
                             .any(|repository| repository.path == repository_path);
 
     if !already_exists {
-        repositories.push(Repository {name : "".to_string(), path : repository_path});
+        repositories.push(Repository {name : get_repo_name(repository_path.clone())?, 
+                                      path : repository_path});
     }
 
     let json = serde_json::to_string_pretty(&repositories)
@@ -89,6 +112,58 @@ fn get_repositories(app : tauri::AppHandle) -> Result<Vec<Repository>, String> {
     Ok(repositories)
 }
 
+fn extract_repo_name(remote_url : &str) -> String {
+    remote_url
+        .trim_end_matches(".git")
+        .rsplit(['/', ':'])
+        .next()
+        .unwrap_or(remote_url)
+        .to_string()
+}
+
+#[tauri::command]
+fn get_repo_name(repo_path : String) -> Result<String, String> {
+    use std::process::Command;
+
+    let remote_output = Command::new("git")
+                    .args(["remote", "get-url", "origin"])
+                    .current_dir(&repo_path)
+                    .output();
+
+    if let Ok(output) = remote_output {
+        if output.status.success() {
+            let remote_url = String::from_utf8_lossy(&output.stdout)
+                                .trim()
+                                .to_string();
+            if !remote_url.is_empty() {
+                return Ok(extract_repo_name(&remote_url));
+            }
+        }
+    }
+
+    let root_output = Command::new("git")
+        .args(["rev-parse", "--show-toplevel"])
+        .current_dir(&repo_path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if !root_output.status.success() {
+        return Err(String::from_utf8_lossy(&root_output.stderr).to_string());
+    }
+
+    let repo_root = String::from_utf8_lossy(&root_output.stdout)
+        .trim()
+        .to_string();
+
+    let folder_name = Path::new(&repo_root)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or("Failed to get repository folder name")?
+        .to_string();
+
+    Ok(folder_name)
+}
+
 #[tauri::command]
 fn git_status(path: &str) -> String {
     use std::process::Command;
@@ -112,6 +187,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![verify_repository, 
                                                  save_repository, 
                                                  get_repositories, 
+                                                 git_commit,
                                                  git_status])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
