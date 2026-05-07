@@ -16,10 +16,6 @@ fn git_commit(commit_msg : String) -> Result<(), String> {
                     .output()
                     .map_err(|error| error.to_string());
     
-    let push = std::process::Command::new("git")
-                    .args(["push", "-u", "origin", "main"])
-                    .output()
-                    .map_err(|error| error.to_string());
     Ok(())
 }
 
