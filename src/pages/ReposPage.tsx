@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 
 import { getGitStatus } from "../features/git/api";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
-import { GitFileStatus } from "../features/git/model/gitTypes";
+import { GitFileStatus, Repository, RepositoriesConfig } from "../features/git/model/gitTypes";
 
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import { GitStatusButton } from "../features/git/components/GitStatusButton";
 import Button from "../features/git/components/UI/Button";
+import GitProjectsList from "../features/git/components/GitProjectsList";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -17,10 +18,29 @@ const getErrorMessage = (error: unknown): string => {
 
 const ReposPage = () => {
   const [files, setFiles] = useState<GitFileStatus[]>([]);
+  const [repos, setRepos] = useState<Repository[]>([]);
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
 
+  useEffect(() => {
+    loadRepositories();
+  }, []);
+
   const hasRepository = Boolean(repoPath);
+
+  const loadRepositories = async () => {
+    try {
+      const config = await invoke<RepositoriesConfig>("get_repositories");
+      setRepos(config.repositories);
+    } catch (error) {
+      setRepoError(getErrorMessage(error));
+    }
+  };
+
+  const selectSavedRepository = (repository: Repository) => {
+    setRepoPath(repository.path);
+    resetRepositoryData();
+  };
 
   const resetRepositoryData = () => {
     setFiles([]);
@@ -116,6 +136,11 @@ const ReposPage = () => {
 
         <Button onClick={selectRepo} label="Choose repository" />
       </div>
+
+      <GitProjectsList
+        repositories={repos}
+        onSelect={selectSavedRepository}
+      />
 
       {hasRepository && (
         <div className="repo_item">

@@ -62,8 +62,13 @@ fn repositories_file_path(app : &tauri::AppHandle) -> Result<std::path::PathBuf,
     Ok(path)
 }
 
+#[derive(Serialize, Deserialize, Clone, Default)]
+pub struct RepositoriesConfig {
+    pub repositories: Vec<Repository>,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
-struct Repository {
+pub struct Repository {
     name : String,
     path : String,
 }
@@ -71,27 +76,28 @@ struct Repository {
 #[tauri::command]
 async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Result<(), String> {
     let file_path = repositories_file_path(&app)?;
-    
-    let mut repositories: Vec<Repository> = if file_path.exists() {
+
+    let mut config: RepositoriesConfig = if file_path.exists() {
         let content = std::fs::read_to_string(&file_path)
             .map_err(|error| error.to_string())?;
 
         serde_json::from_str(&content)
-            .unwrap_or_else(|_| Vec::new())
+            .unwrap_or_default()
     } else {
-        Vec::new()
+        RepositoriesConfig::default()
     };
-
-    let already_exists = repositories
+    
+    let already_exists = config
+                            .repositories
                             .iter()
                             .any(|repository| repository.path == repository_path);
 
     if !already_exists {
-        repositories.push(Repository {name : get_repo_name(repository_path.clone())?, 
+        config.repositories.push(Repository {name : get_repo_name(repository_path.clone())?, 
                                       path : repository_path});
     }
 
-    let json = serde_json::to_string_pretty(&repositories)
+    let json = serde_json::to_string_pretty(&config)
                     .map_err(|error| error.to_string())?;
     
     std::fs::write(&file_path, json)
@@ -101,11 +107,11 @@ async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Res
 }
 
 #[tauri::command]
-fn get_repositories(app : tauri::AppHandle) -> Result<Vec<Repository>, String> {
+fn get_repositories(app : tauri::AppHandle) -> Result<RepositoriesConfig, String> {
     let file_path = repositories_file_path(&app)?;
 
     if !file_path.exists() {
-        return Ok(Vec::new());
+        return Ok(RepositoriesConfig::default());
     }
 
     let content = std::fs::read_to_string(&file_path)

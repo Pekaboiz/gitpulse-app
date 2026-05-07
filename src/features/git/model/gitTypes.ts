@@ -17,3 +17,12 @@ export type ActiveTabContextValue = {
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
 };
+
+export type Repository = {
+  path: string;
+  name: string;
+};
+
+export type RepositoriesConfig = {
+  repositories: Repository[];
+};
