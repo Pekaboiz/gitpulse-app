@@ -5,9 +5,6 @@ use serde::{Deserialize, Serialize};
 
 #[tauri::command]
 fn git_commit(repository_path : String, message : String) -> Result<(), String> {
-    print!("(Rust) repoPath: {}", repository_path);
-    print!("(Rust) message: {}", message);
-
     let add_output = std::process::Command::new("git")
                     .current_dir(&repository_path)
                     .args(["add", "."])

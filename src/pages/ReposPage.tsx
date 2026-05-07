@@ -89,9 +89,6 @@ const ReposPage = () => {
     }
 
     try {
-      console.log("repoPath: ", repoPath);
-      console.log("message: ", commitMessage.trim());
-      
       await invoke("git_commit", {
         repositoryPath: repoPath,
         message: commitMessage.trim(),

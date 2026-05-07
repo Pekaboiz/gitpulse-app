@@ -2,14 +2,20 @@ import { useState } from "react";
 import Button from "./UI/Button";
 
 type Props = {
-  onClick: (commitMsg: string) => void;
+  onClick: (commitMsg: string) => void | Promise<void>;
 };
 
 function GitCommit({ onClick }: Props) {
   const [commitMsg, setCommitMsg] = useState("");
 
-  const handleCommit = () => {
-    onClick(commitMsg);
+  const handleCommit = async () => {
+    const message = commitMsg.trim();
+
+    if (!message) {
+      return;
+    }
+
+    await onClick(message);
     setCommitMsg("");
   };
 
