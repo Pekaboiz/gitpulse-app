@@ -1,21 +1,33 @@
 use std::{path::Path};
 
-use serde_json::to_string;
 use tauri::Manager;
 use serde::{Deserialize, Serialize};
 
 #[tauri::command]
-fn git_commit(commit_msg : String) -> Result<(), String> {
-    let add = std::process::Command::new("git")
+fn git_commit(repository_path : String, message : String) -> Result<(), String> {
+    print!("(Rust) repoPath: {}", repository_path);
+    print!("(Rust) message: {}", message);
+
+    let add_output = std::process::Command::new("git")
+                    .current_dir(&repository_path)
                     .args(["add", "."])
                     .output()
-                    .map_err(|error| error.to_string());
+                    .map_err(|error| error.to_string())?;
 
-    let commit = std::process::Command::new("git")
-                    .args(["commit", "-", "${commit_msg}"])
+    if !add_output.status.success() {
+        return Err(String::from_utf8_lossy(&add_output.stdout).to_string());
+    }
+
+    let commit_output = std::process::Command::new("git")
+                    .current_dir(&repository_path)
+                    .args(["commit", "-m", &message])
                     .output()
-                    .map_err(|error| error.to_string());
+                    .map_err(|error| error.to_string())?;
     
+    if !commit_output.status.success() {
+        return Err(String::from_utf8_lossy(&commit_output.stdout).to_string());
+    }
+
     Ok(())
 }
 

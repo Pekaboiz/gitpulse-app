@@ -1,21 +1,39 @@
-import { useState } from 'react'
-import { parseGitStatus } from '../features/git/model/gitStatusParser';
-import GitFileList from '../features/git/components/GitFileList';
-import { GitFileStatus } from '../features/git/model/gitTypes';
-import { getGitStatus } from '../features/git/api';
-import { GitStatusButton } from '../features/git/components/GitStatusButton';
-import Button from '../features/git/components/UI/Button';
-import { open } from '@tauri-apps/plugin-dialog';
+import { useState } from "react";
+import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import GitCommit from '../features/git/components/GitCommit';
+
+import { getGitStatus } from "../features/git/api";
+import { parseGitStatus } from "../features/git/model/gitStatusParser";
+import { GitFileStatus } from "../features/git/model/gitTypes";
+
+import GitFileList from "../features/git/components/GitFileList";
+import GitCommit from "../features/git/components/GitCommit";
+import { GitStatusButton } from "../features/git/components/GitStatusButton";
+import Button from "../features/git/components/UI/Button";
+
+const getErrorMessage = (error: unknown): string => {
+  return error instanceof Error ? error.message : String(error);
+};
 
 const ReposPage = () => {
-
   const [files, setFiles] = useState<GitFileStatus[]>([]);
-  const [repoPath, setRepoPath] = useState<string>("");
-  const [repoError, setRepoError] = useState<string>("");
+  const [repoPath, setRepoPath] = useState("");
+  const [repoError, setRepoError] = useState("");
 
-  async function handleGitStatus() {
+  const hasRepository = Boolean(repoPath);
+
+  const resetRepositoryData = () => {
+    setFiles([]);
+    setRepoError("");
+  };
+
+  const clearRepository = (error: unknown) => {
+    setRepoPath("");
+    setFiles([]);
+    setRepoError(getErrorMessage(error));
+  };
+
+  const handleGitStatus = async () => {
     if (!repoPath) {
       setRepoError("Сначала выбери Git-репозиторий");
       return;
@@ -23,28 +41,29 @@ const ReposPage = () => {
 
     try {
       const output = await getGitStatus(repoPath);
-      const parsed = parseGitStatus(output);
-      setFiles(parsed);
+      const parsedFiles = parseGitStatus(output);
+
+      setFiles(parsedFiles);
       setRepoError("");
     } catch (error) {
-      setRepoError(String(error));
+      setRepoError(getErrorMessage(error));
     }
-  }
+  };
 
   const selectRepo = async () => {
-    const path = await open({
+    const selectedPath = await open({
       directory: true,
       multiple: false,
-      title: "Выбери Git репозиторий",
+      title: "Выбери Git-репозиторий",
     });
-    
-    if (typeof path !== "string") {
+
+    if (typeof selectedPath !== "string") {
       return;
     }
 
     try {
       const verifiedPath = await invoke<string>("verify_repository", {
-        path,
+        path: selectedPath,
       });
 
       await invoke("save_repository", {
@@ -52,31 +71,64 @@ const ReposPage = () => {
       });
 
       setRepoPath(verifiedPath);
-      setRepoError("");
-      setFiles([]);
+      resetRepositoryData();
     } catch (error) {
-      setRepoPath("");
-      setRepoError(String(error));
-      setFiles([]);
+      clearRepository(error);
     }
-};
+  };
+
+  const commitRepo = async (commitMessage: string) => {
+    if (!repoPath) {
+      setRepoError("Сначала выбери Git-репозиторий");
+      return;
+    }
+
+    if (!commitMessage.trim()) {
+      setRepoError("Введите commit message");
+      return;
+    }
+
+    try {
+      console.log("repoPath: ", repoPath);
+      console.log("message: ", commitMessage.trim());
+      
+      await invoke("git_commit", {
+        repositoryPath: repoPath,
+        message: commitMessage.trim(),
+      });
+
+      setRepoError("");
+      await handleGitStatus();
+    } catch (error) {
+      setRepoError(getErrorMessage(error));
+    }
+  };
 
   return (
     <div>
       <h1>Git Pulse</h1>
 
-      <input id='git_input' value={`~${repoPath}`} className="git_input" placeholder='~/choosen_path'/>
-      <Button onClick={selectRepo} label='Choose file'/>
+      <div>
+        <input
+          id="git_input"
+          className="git_input"
+          value={repoPath ? `~${repoPath}` : ""}
+          placeholder="~/chosen_path"
+          readOnly
+        />
 
-      {repoPath.length > 0 &&
-      <div className="repo_item">
-        <p>Actions</p>
-        <GitCommit/>
-        <GitStatusButton onClick={handleGitStatus}/>
-        <GitFileList files={files}/>
-        
+        <Button onClick={selectRepo} label="Choose repository" />
       </div>
-      }
+
+      {hasRepository && (
+        <div className="repo_item">
+          <p>Actions</p>
+
+          <GitCommit onClick={commitRepo}/>
+          <GitStatusButton onClick={handleGitStatus} />
+          <GitFileList files={files} />
+        </div>
+      )}
 
       {repoError && (
         <p style={{ color: "red" }}>
@@ -84,7 +136,7 @@ const ReposPage = () => {
         </p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ReposPage
+export default ReposPage;

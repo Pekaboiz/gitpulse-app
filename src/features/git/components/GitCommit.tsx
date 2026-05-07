@@ -1,16 +1,30 @@
-import React, { useState } from 'react'
-import Button from './UI/Button';
+import { useState } from "react";
+import Button from "./UI/Button";
 
-function GitCommit() {
-  const [commitMsg, setCommitMsg] = useState<string>("");
+type Props = {
+  onClick: (commitMsg: string) => void;
+};
+
+function GitCommit({ onClick }: Props) {
+  const [commitMsg, setCommitMsg] = useState("");
+
+  const handleCommit = () => {
+    onClick(commitMsg);
+    setCommitMsg("");
+  };
 
   return (
     <div>
-        <input onChange={(e) => {setCommitMsg(e.target.value)}} 
-                type="text" placeholder='commit message'/>
-        <Button onClick={() => {}} label='Commit changes'/>
+      <input
+        value={commitMsg}
+        onChange={(e) => setCommitMsg(e.target.value)}
+        type="text"
+        placeholder="commit message"
+      />
+
+      <Button onClick={handleCommit} label="Commit changes" />
     </div>
-  )
+  );
 }
 
-export default GitCommit
+export default GitCommit;
