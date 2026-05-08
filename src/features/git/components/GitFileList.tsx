@@ -1,3 +1,4 @@
+//test
 import { GitFileStatus } from '../model/gitTypes';
 import { formatStatus } from '../model/gitStatusParser';
 
