@@ -1,6 +1,7 @@
 export type GitFileStatus = {
     status : string,
-    file : string
+    file : string,
+    checked : boolean,
 }
 
 export const TABS = {

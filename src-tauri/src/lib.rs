@@ -1,13 +1,22 @@
 use std::{path::Path};
-
 use tauri::Manager;
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Files {
+    status : String,
+    file : String,
+    checked : bool,
+}
+
 #[tauri::command]
-fn git_commit(repository_path : String, message : String) -> Result<(), String> {
+fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<(), String> {
+    let checked_files: Vec<String>  = files.iter().filter(|f| f.checked).map(|el| el.file.clone()).collect();
+
     let add_output = std::process::Command::new("git")
                     .current_dir(&repository_path)
-                    .args(["add", "."])
+                    .arg("add")
+                    .args(&checked_files)
                     .output()
                     .map_err(|error| error.to_string())?;
 

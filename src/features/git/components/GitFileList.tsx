@@ -13,9 +13,11 @@ function GitFileList( {files} : Props ) {
   return (
     <ul>
         {files.map((file) => {
+          
           const meta = formatStatus(file.status);
           return (
             <li key={`${file.status}-${file.file}`}>
+              <input onClick={() => {file.checked = !file.checked; console.log(file)}} type="checkbox" name="cheked" defaultChecked={file.checked}/>
               <span className={`status ${meta.className}`}>{meta.label}</span> ~{file.file}
             </li>)
       })}

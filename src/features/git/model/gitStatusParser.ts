@@ -7,8 +7,8 @@ return output
         .map((line) => {
         const status = line.slice(0, 2).trim();
         const file = line.slice(3);
-
-        return{status, file};
+        const checked = true;
+        return{status, file, checked};
         });
 }
 
