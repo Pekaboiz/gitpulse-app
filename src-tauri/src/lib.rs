@@ -20,6 +20,8 @@ fn git_commit(repository_path : String, message : String, files : Vec<Files>) ->
                     .output()
                     .map_err(|error| error.to_string())?;
 
+    print!("{}", String::from_utf8_lossy(&add_output.stdout));
+
     if !add_output.status.success() {
         return Err(String::from_utf8_lossy(&add_output.stdout).to_string());
     }
@@ -30,6 +32,8 @@ fn git_commit(repository_path : String, message : String, files : Vec<Files>) ->
                     .output()
                     .map_err(|error| error.to_string())?;
     
+    print!("{}", String::from_utf8_lossy(&commit_output.stdout));
+
     if !commit_output.status.success() {
         return Err(String::from_utf8_lossy(&commit_output.stdout).to_string());
     }
