@@ -112,6 +112,7 @@ const ReposPage = () => {
       await invoke("git_commit", {
         repositoryPath: repoPath,
         message: commitMessage.trim(),
+        files : files,
       });
 
       setRepoError("");
