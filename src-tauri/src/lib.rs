@@ -11,8 +11,12 @@ pub struct Files {
 }
 
 #[tauri::command]
-fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<(), String> {
+fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<String, String> {
     let checked_files: Vec<String>  = files.iter().filter(|f| f.checked).map(|el| el.file.clone()).collect();
+
+    if checked_files.is_empty() {
+        return Err("No files selected for commit".to_string());
+    }
 
     let add_output = std::process::Command::new("git")
                     .current_dir(&repository_path)
@@ -32,14 +36,12 @@ fn git_commit(repository_path : String, message : String, files : Vec<Files>) ->
                     .args(["commit", "-m", &message])
                     .output()
                     .map_err(|error| error.to_string())?;
-    
-    print!("{}", String::from_utf8_lossy(&commit_output.stdout));
 
     if !commit_output.status.success() {
         return Err(String::from_utf8_lossy(&commit_output.stdout).to_string());
     }
 
-    Ok(())
+    Ok(String::from_utf8_lossy(&commit_output.stdout).to_string())
 }
 
 #[tauri::command]

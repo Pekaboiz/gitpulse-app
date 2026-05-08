@@ -22,6 +22,7 @@ const ReposPage = () => {
   const [repos, setRepos] = useState<Repository[]>([]);
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
+  const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
 
   useEffect(() => {
     loadRepositories();
@@ -45,12 +46,14 @@ const ReposPage = () => {
 
   const resetRepositoryData = () => {
     setFiles([]);
-    setRepoError("");
+    setRepoError("")
+    setRepoCommitMsg("");
   };
 
   const clearRepository = (error: unknown) => {
     setRepoPath("");
     setFiles([]);
+    setRepoCommitMsg("");
     setRepoError(getErrorMessage(error));
   };
 
@@ -67,6 +70,7 @@ const ReposPage = () => {
       setFiles(parsedFiles);
       setRepoError("");
     } catch (error) {
+      setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
     }
   };
@@ -94,6 +98,7 @@ const ReposPage = () => {
       setRepoPath(verifiedPath);
       resetRepositoryData();
     } catch (error) {
+      setRepoCommitMsg("");
       clearRepository(error);
     }
   };
@@ -110,15 +115,16 @@ const ReposPage = () => {
     }
 
     try {
-      await invoke("git_commit", {
+      setRepoCommitMsg(await invoke("git_commit", {
         repositoryPath: repoPath,
         message: commitMessage.trim(),
         files : files,
-      });
+      }));
 
       setRepoError("");
       await handleGitStatus();
     } catch (error) {
+      setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
     }
   };
