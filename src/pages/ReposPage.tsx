@@ -156,12 +156,16 @@ const ReposPage = () => {
 
           <GitCommit onClick={commitRepo}/>
           <GitStatusButton onClick={handleGitStatus} />
-          {repoCommitMsg && (
-            <p>
-              {repoCommitMsg}
-            </p>
-          )}
-          <GitFileList files={files} />
+          {repoCommitMsg ? 
+            (
+              <p>
+                {repoCommitMsg}
+              </p>
+            ) 
+            : 
+            <GitFileList files={files} />
+          }
+          
         </div>
       )}
 
