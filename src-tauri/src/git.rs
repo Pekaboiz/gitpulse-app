@@ -90,6 +90,6 @@ pub fn is_git_ignored(
         .arg(&file_path)
         .output()
         .map_err(|error| error.to_string())?;
-
+    
     Ok(output.status.success())
 }
