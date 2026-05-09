@@ -1,5 +1,5 @@
 //test
-use std::{path::Path};
+use std::{path::Path, vec};
 use tauri::Manager;
 use serde::{Deserialize, Serialize};
 
@@ -11,38 +11,54 @@ pub struct Files {
 }
 
 #[tauri::command]
-fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<String, String> {
-    let checked_files: Vec<String>  = files.iter()
-                                      .filter(|f| f.checked)
-                                      .map(|el| el.file.clone())
-                                      .collect();
+fn git_commit(
+    app: tauri::AppHandle,
+    repository_path: String,
+    message: String,
+    files: Vec<Files>,
+) -> Result<String, String> {
+    let checked_files: Vec<String> = files
+        .iter()
+        .filter(|f| f.checked)
+        .map(|el| el.file.clone())
+        .collect();
 
     if checked_files.is_empty() {
         return Err("No files selected for commit".to_string());
     }
 
     let add_output = std::process::Command::new("git")
-                    .current_dir(&repository_path)
-                    .arg("add")
-                    .args(&checked_files)
-                    .output()
-                    .map_err(|error| error.to_string())?;
+        .current_dir(&repository_path)
+        .arg("add")
+        .args(&checked_files)
+        .output()
+        .map_err(|error| error.to_string())?;
 
     if !add_output.status.success() {
-        return Err(String::from_utf8_lossy(&add_output.stdout).to_string());
+        return Err(String::from_utf8_lossy(&add_output.stderr).to_string());
     }
 
     let commit_output = std::process::Command::new("git")
-                    .current_dir(&repository_path)
-                    .args(["commit", "-m", &message])
-                    .output()
-                    .map_err(|error| error.to_string())?;
+        .current_dir(&repository_path)
+        .args(["commit", "-m", &message])
+        .output()
+        .map_err(|error| error.to_string())?;
 
     if !commit_output.status.success() {
-        return Err(String::from_utf8_lossy(&commit_output.stdout).to_string());
+        return Err(String::from_utf8_lossy(&commit_output.stderr).to_string());
     }
 
-    Ok(String::from_utf8_lossy(&commit_output.stdout).to_string())
+    let output_message = String::from_utf8_lossy(&commit_output.stdout).to_string();
+
+    add_history_item(&app, HistoryItem {
+        action_type: ActionType::Commit,
+        repo_path: repository_path.clone(),
+        message: output_message.clone(),
+        file_count: checked_files.len(),
+        created_at: chrono::Utc::now().to_rfc3339(),
+    })?;
+
+    Ok(output_message)
 }
 
 #[tauri::command]
@@ -235,21 +251,29 @@ struct HistoryItem {
     repo_path : String,
     message : String,
     file_count : usize,
-    created_at : usize,
+    created_at : String,
 }
 
-fn add_history_item(app : tauri::AppHandle, hist_item : HistoryItem) -> Result<(), String> {
-    let file_path = repositories_file_path(&app, "logging")?;
+fn add_history_item(app : &tauri::AppHandle, hist_item : HistoryItem) -> Result<(), String> {
+    let file_path = repositories_file_path(&app, "logger")?;
 
-    let mut item : HistoryItem = if file_path.exists() {
+    let mut item : Vec<HistoryItem> = if file_path.exists() {
         let content: String = std::fs::read_to_string(&file_path)
         .map_err(|error| error.to_string())?;
 
         serde_json::from_str(&content)
             .map_err(|error| error.to_string())?
     } else {
-        HistoryItem::default()
+        vec![HistoryItem::default()]
     };
+
+    item.push(hist_item);
+
+    let json = serde_json::to_string_pretty(&item)
+                    .map_err(|error| error.to_string())?;
+    
+    std::fs::write(&file_path, json)
+        .map_err(|error| error.to_string())?;
 
     Ok(())
 }
