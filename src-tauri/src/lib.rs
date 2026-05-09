@@ -14,9 +14,6 @@ pub struct Files {
 fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<String, String> {
     let checked_files: Vec<String>  = files.iter()
                                       .filter(|f| f.checked)
-                                      .filter(|f| !f.file.starts_with("node_modules/"))
-                                      .filter(|f| !f.file.starts_with("dist/"))
-                                      .filter(|f| !f.file.starts_with("src-tauri/target/"))
                                       .map(|el| el.file.clone())
                                       .collect();
 
@@ -210,6 +207,19 @@ fn git_status(path: &str) -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
+#[tauri::command]
+fn is_git_ignored(repository_path : String, file_path : String) -> Result<bool, String> {
+    let output = std::process::Command::new("git")
+                 .arg("-C")
+                 .arg(&repository_path)
+                 .arg("check-ignore")
+                 .arg(&file_path)
+                 .output()
+                 .map_err(|error| error.to_string())?;
+
+    Ok(!output.status.success())
+}
+
 #[derive(Debug, Serialize, Deserialize, Default)]
 enum ActionType {
     #[default]
@@ -252,6 +262,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![verify_repository, 
                                                  save_repository, 
                                                  get_repositories, 
+                                                 is_git_ignored,
                                                  git_commit,
                                                  git_status])
         .run(tauri::generate_context!())

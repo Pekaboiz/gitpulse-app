@@ -67,7 +67,20 @@ const ReposPage = () => {
       const output = await getGitStatus(repoPath);
       const parsedFiles = parseGitStatus(output);
 
-      setFiles(parsedFiles);
+      const visibleFiles = [];
+
+      for (const file of parsedFiles) {
+        const canAdd = await invoke<boolean>("is_git_ignored", {
+          repositoryPath : repoPath,
+          filePath : file.file,
+        });
+
+        if (canAdd) {
+          visibleFiles.push(file);
+        }
+      }
+
+      setFiles(visibleFiles);
       setRepoError("");
     } catch (error) {
       setRepoCommitMsg("");
