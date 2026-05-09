@@ -12,7 +12,13 @@ pub struct Files {
 
 #[tauri::command]
 fn git_commit(repository_path : String, message : String, files : Vec<Files>) -> Result<String, String> {
-    let checked_files: Vec<String>  = files.iter().filter(|f| f.checked).map(|el| el.file.clone()).collect();
+    let checked_files: Vec<String>  = files.iter()
+                                      .filter(|f| f.checked)
+                                      .filter(|f| !f.file.starts_with("node_modules/"))
+                                      .filter(|f| !f.file.starts_with("dist/"))
+                                      .filter(|f| !f.file.starts_with("src-tauri/target/"))
+                                      .map(|el| el.file.clone())
+                                      .collect();
 
     if checked_files.is_empty() {
         return Err("No files selected for commit".to_string());
@@ -24,8 +30,6 @@ fn git_commit(repository_path : String, message : String, files : Vec<Files>) ->
                     .args(&checked_files)
                     .output()
                     .map_err(|error| error.to_string())?;
-
-    print!("{}", String::from_utf8_lossy(&add_output.stdout));
 
     if !add_output.status.success() {
         return Err(String::from_utf8_lossy(&add_output.stdout).to_string());
@@ -64,7 +68,7 @@ fn verify_repository(path: String) -> Result<String, String> {
     Ok(path)
 }
 
-fn repositories_file_path(app : &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+fn repositories_file_path(app : &tauri::AppHandle, name : &str) -> Result<std::path::PathBuf, String> {
     let mut path = app
                    .path()
                    .app_data_dir()
@@ -73,7 +77,7 @@ fn repositories_file_path(app : &tauri::AppHandle) -> Result<std::path::PathBuf,
     std::fs::create_dir_all(&path)
         .map_err(|error| error.to_string())?;
 
-    path.push("repositories.json");
+    path.push(format!("{name}.json"));
 
     Ok(path)
 }
@@ -91,7 +95,7 @@ pub struct Repository {
 
 #[tauri::command]
 async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Result<(), String> {
-    let file_path = repositories_file_path(&app)?;
+    let file_path = repositories_file_path(&app, "repositories")?;
 
     let mut config: RepositoriesConfig = if file_path.exists() {
         let content = std::fs::read_to_string(&file_path)
@@ -124,7 +128,7 @@ async fn save_repository(app : tauri::AppHandle, repository_path: String) -> Res
 
 #[tauri::command]
 fn get_repositories(app : tauri::AppHandle) -> Result<RepositoriesConfig, String> {
-    let file_path = repositories_file_path(&app)?;
+    let file_path = repositories_file_path(&app, "repositories")?;
 
     if !file_path.exists() {
         return Ok(RepositoriesConfig::default());
@@ -204,6 +208,40 @@ fn git_status(path: &str) -> String {
         .expect("failed to execute git");
 
     String::from_utf8_lossy(&output.stdout).to_string()
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+enum ActionType {
+    #[default]
+    Commit,
+    Snapshot,
+    StatusCheck,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+struct HistoryItem {
+    action_type : ActionType ,
+    repo_path : String,
+    message : String,
+    file_count : usize,
+    created_at : usize,
+}
+
+fn add_history_item(app : tauri::AppHandle, hist_item : HistoryItem) -> Result<(), String> {
+    let file_path = repositories_file_path(&app, "logging")?;
+
+    let mut item : HistoryItem = if file_path.exists() {
+        let content: String = std::fs::read_to_string(&file_path)
+        .map_err(|error| error.to_string())?;
+
+        serde_json::from_str(&content)
+            .map_err(|error| error.to_string())?
+    } else {
+        HistoryItem::default()
+    };
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

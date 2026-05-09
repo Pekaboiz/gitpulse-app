@@ -115,6 +115,10 @@ const ReposPage = () => {
     }
 
     try {
+      console.log(repoPath);
+      console.log(commitMessage.trim());
+      console.log(files);
+
       setRepoCommitMsg(await invoke("git_commit", {
         repositoryPath: repoPath,
         message: commitMessage.trim(),
