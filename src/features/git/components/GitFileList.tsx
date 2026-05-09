@@ -8,7 +8,7 @@ type Props = {
 
 function GitFileList( {files} : Props ) {
   if (files.length === 0) {
-    return <p>No changes</p>;
+    return <p>Working tree clean</p>;
   }
   
   return (
@@ -18,7 +18,8 @@ function GitFileList( {files} : Props ) {
           const meta = formatStatus(file.status);
           return (
             <li key={`${file.status}-${file.file}`}>
-              <input onClick={() => {file.checked = !file.checked; console.log(file)}} type="checkbox" name="cheked" defaultChecked={file.checked}/>
+              <input onClick={() => {file.checked = !file.checked; 
+                                    console.log(file)}} type="checkbox" name="cheked" defaultChecked={file.checked}/>
               <span className={`status ${meta.className}`}>{meta.label}</span> ~{file.file}
             </li>)
       })}

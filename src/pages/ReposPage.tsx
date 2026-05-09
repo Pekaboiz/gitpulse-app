@@ -1,12 +1,9 @@
-//test
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-
 import { getGitStatus } from "../features/git/api";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
 import { GitFileStatus, Repository, RepositoriesConfig } from "../features/git/model/gitTypes";
-
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import { GitStatusButton } from "../features/git/components/GitStatusButton";
@@ -70,12 +67,12 @@ const ReposPage = () => {
       const visibleFiles = [];
 
       for (const file of parsedFiles) {
-        const canAdd = await invoke<boolean>("is_git_ignored", {
-          repositoryPath : repoPath,
-          filePath : file.file,
+        const isIgnored = await invoke<boolean>("is_git_ignored", {
+          repositoryPath: repoPath,
+          filePath: file.file,
         });
 
-        if (canAdd) {
+        if (!isIgnored) {
           visibleFiles.push(file);
         }
       }
