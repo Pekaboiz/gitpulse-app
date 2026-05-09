@@ -7,7 +7,7 @@ import { GitFileStatus, Repository, RepositoriesConfig } from "../features/git/m
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import { GitStatusButton } from "../features/git/components/GitStatusButton";
-import Button from "../features/git/components/UI/Button";
+import Button from "../shared/components/UI/Button";
 import GitProjectsList from "../features/git/components/GitProjectsList";
 import GitSnapshot from "../features/git/components/GitSnapshot";
 
@@ -122,7 +122,7 @@ const ReposPage = () => {
 
     try {
       setRepoCommitMsg(await invoke("git_snapshot", {
-        repoPath: repoPath
+        repositoryPath: repoPath
       }));
 
       setRepoError("");
@@ -145,8 +145,6 @@ const ReposPage = () => {
     }
 
     try {
-      console.log(repoPath);
-      console.log(commitMessage.trim());
       console.log(files);
 
       setRepoCommitMsg(await invoke("git_commit", {

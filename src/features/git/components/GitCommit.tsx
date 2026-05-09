@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "./UI/Button";
+import Button from "../../../shared/components/UI/Button";
 
 type Props = {
   onClick: (commitMsg: string) => void | Promise<void>;

@@ -1,8 +1,7 @@
-// import "./App.css";
 import "./styles/reset.css"
 import "./styles/global.css"
-import AppLayout from "./app/appLayout";
 import { ActiveTabProvider } from "./features/git/hooks/ActiveTabContext";
+import AppLayout from "./app/AppLayout";
 
 function App() {
   

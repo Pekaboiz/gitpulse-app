@@ -1,5 +1,5 @@
 import { Repository } from '../model/gitTypes'
-import Button from './UI/Button';
+import Button from '../../../shared/components/UI/Button';
 
 type Props = {
   repositories: Repository[];

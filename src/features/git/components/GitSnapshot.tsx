@@ -1,4 +1,4 @@
-import Button from "./UI/Button";
+import Button from "../../../shared/components/UI/Button";
 
 type Props = {
   onClick: () => void | Promise<void>;
