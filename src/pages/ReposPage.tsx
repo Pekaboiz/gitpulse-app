@@ -9,6 +9,7 @@ import GitCommit from "../features/git/components/GitCommit";
 import { GitStatusButton } from "../features/git/components/GitStatusButton";
 import Button from "../features/git/components/UI/Button";
 import GitProjectsList from "../features/git/components/GitProjectsList";
+import GitSnapshot from "../features/git/components/GitSnapshot";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -113,6 +114,25 @@ const ReposPage = () => {
     }
   };
 
+  const commitSnapshot = async () => {
+    if (!repoPath) {
+      setRepoError("Сначала выбери Git-репозиторий");
+      return;
+    }
+
+    try {
+      setRepoCommitMsg(await invoke("git_snapshot", {
+        repoPath: repoPath
+      }));
+
+      setRepoError("");
+      await handleGitStatus();
+    } catch (error) {
+      setRepoCommitMsg("");
+      setRepoError(getErrorMessage(error));
+    }
+  };
+
   const commitRepo = async (commitMessage: string) => {
     if (!repoPath) {
       setRepoError("Сначала выбери Git-репозиторий");
@@ -168,6 +188,7 @@ const ReposPage = () => {
         <div className="repo_item">
           <p>Actions</p>
 
+          <GitSnapshot onClick={commitSnapshot}/>
           <GitCommit onClick={commitRepo}/>
           <GitStatusButton onClick={handleGitStatus} />
           {repoCommitMsg ? 

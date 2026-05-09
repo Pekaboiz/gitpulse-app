@@ -16,6 +16,7 @@ pub fn run() {
             repositories::get_repositories,
             repositories::get_repo_name,
             git::is_git_ignored,
+            git::git_snapshot,
             git::git_commit,
             git::git_status,
         ])
