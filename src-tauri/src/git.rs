@@ -156,7 +156,6 @@ pub fn git_snapshot(app: tauri::AppHandle, repository_path: String) -> Result<St
 
 #[tauri::command]
 pub fn git_status(repository_path: String) -> Result<String, String> {
-    println!("here");
     run_git_command(&repository_path, &["status", "--porcelain"])
 }
 
@@ -170,8 +169,5 @@ pub fn is_git_ignored(repository_path: String, file_path: String) -> Result<bool
         .output()
         .map_err(|error| error.to_string())?;
 
-    println!("file_path: {:?}", &file_path);
-    println!("repository_path: {:?}", &repository_path);
-    println!("output_message: {:?}", output);
-    Ok(output.status.success())
+        Ok(output.status.success())
 }
