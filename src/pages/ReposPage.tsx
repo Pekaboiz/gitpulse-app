@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { getGitStatus } from "../features/git/api";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
 import { GitFileStatus, Repository, RepositoriesConfig } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
@@ -10,6 +9,8 @@ import { GitStatusButton } from "../features/git/components/GitStatusButton";
 import Button from "../shared/components/UI/Button";
 import GitProjectsList from "../features/git/components/GitProjectsList";
 import GitSnapshot from "../features/git/components/GitSnapshot";
+import { useLoading } from "../features/git/hooks/LoaderStates";
+import { useGitApi } from "../features/git/api";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -21,6 +22,8 @@ const ReposPage = () => {
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
+  const {isAnyLoading} = useLoading();
+  const { getGitStatus, getRepoConfig, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
 
   useEffect(() => {
     loadRepositories();
@@ -30,7 +33,7 @@ const ReposPage = () => {
 
   const loadRepositories = async () => {
     try {
-      const config = await invoke<RepositoriesConfig>("get_repositories");
+      const config = await getRepoConfig();
       setRepos(config.repositories);
     } catch (error) {
       setRepoError(getErrorMessage(error));
@@ -66,14 +69,11 @@ const ReposPage = () => {
       const parsedFiles = parseGitStatus(output);
 
       const visibleFiles = [];
-
+      console.log(parsedFiles);
       for (const file of parsedFiles) {
-        const isIgnored = await invoke<boolean>("is_git_ignored", {
-          repositoryPath: repoPath,
-          filePath: file.file,
-        });
+        const ignored = await isGitIgnored(repoPath, file);
 
-        if (!isIgnored) {
+        if (!ignored) {
           visibleFiles.push(file);
         }
       }
@@ -98,13 +98,9 @@ const ReposPage = () => {
     }
 
     try {
-      const verifiedPath = await invoke<string>("verify_repository", {
-        path: selectedPath,
-      });
+      const verifiedPath = await verifyRepo(selectedPath);
 
-      await invoke("save_repository", {
-        repositoryPath: verifiedPath,
-      });
+      await saveRepo(verifiedPath);
 
       setRepoPath(verifiedPath);
       resetRepositoryData();
@@ -164,7 +160,7 @@ const ReposPage = () => {
   return (
     <div>
       <h1>Git Pulse</h1>
-
+      {isAnyLoading && <p>loading</p>}
       <div>
         <input
           id="git_input"

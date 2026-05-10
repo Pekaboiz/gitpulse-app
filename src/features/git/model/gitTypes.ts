@@ -28,3 +28,12 @@ export type Repository = {
 export type RepositoriesConfig = {
   repositories: Repository[];
 };
+
+export type LoadingKey = "repos.load" | "repos.save" | "repos.verfy" | "git.status" | "git.commit" | "git.snapshot";
+
+export type LoadingContextValue = {
+    loading : Partial<Record<LoadingKey, boolean>>
+    setLoading : (key : LoadingKey, value : boolean) => void;
+    isLoading : (key : LoadingKey) => boolean;
+    isAnyLoading : boolean;
+}
