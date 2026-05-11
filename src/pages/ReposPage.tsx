@@ -30,6 +30,14 @@ const ReposPage = () => {
 
   const hasRepository = Boolean(repoPath);
 
+  const toggleFile = (fileName : string) => {
+    setFiles((currentFiles) => 
+      currentFiles.map((file) => 
+        file.file == fileName 
+    ? {...file, checked: !file.checked} 
+    : file))
+  }
+
   const loadRepositories = async () => {
     try {
       const config = await getRepoConfig();
@@ -183,7 +191,7 @@ const ReposPage = () => {
               </p>
             ) 
             : 
-            <GitFileList files={files} />
+            <GitFileList onToggle={toggleFile} files={files} />
           }
           
         </div>

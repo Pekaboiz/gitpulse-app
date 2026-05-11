@@ -1,4 +1,3 @@
-//test
 import { GitFileStatus } from "./gitTypes";
 
 export function parseGitStatus(output : string) : GitFileStatus[] {
