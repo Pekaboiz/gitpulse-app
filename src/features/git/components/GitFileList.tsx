@@ -1,12 +1,12 @@
-//test
 import { GitFileStatus } from '../model/gitTypes';
 import { formatStatus } from '../model/gitStatusParser';
 
 type Props = {
   files: GitFileStatus[];
+  onToggle : (file_name : string) => void;
 };
 
-function GitFileList( {files} : Props ) {
+function GitFileList( {files, onToggle} : Props ) {
   if (files.length === 0) {
     return <p>Working tree clean</p>;
   }
@@ -18,8 +18,11 @@ function GitFileList( {files} : Props ) {
           const meta = formatStatus(file.status);
           return (
             <li key={`${file.status}-${file.file}`}>
-              <input onClick={() => {file.checked = !file.checked; 
-                                    console.log(file)}} type="checkbox" name="cheked" defaultChecked={file.checked}/>
+              <input
+                type="checkbox"
+                checked={file.checked}
+                onChange={() => onToggle(file.file)}
+              />
               <span className={`status ${meta.className}`}>{meta.label}</span> ~{file.file}
             </li>)
       })}

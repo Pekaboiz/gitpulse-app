@@ -43,7 +43,7 @@ export function useGitApi() {
   async function gitSnapshot(path: string): Promise<string> {
     return await withLoading("git.snapshot", () =>
       invoke<string>("git_snapshot", {
-        path,
+        repositoryPath : path,
       })
     );
   }
