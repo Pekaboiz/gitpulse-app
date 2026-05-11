@@ -40,6 +40,24 @@ export function useGitApi() {
     );
   }
 
+  async function gitSnapshot(path: string): Promise<string> {
+    return await withLoading("git.snapshot", () =>
+      invoke<string>("git_snapshot", {
+        path,
+      })
+    );
+  }
+
+  async function gitCommit(path: string, commitMessage : string, files : GitFileStatus[]): Promise<string> {
+    return await withLoading("git.commit", () =>
+      invoke("git_commit", {
+        repositoryPath: path,
+        message: commitMessage.trim(),
+        files : files,
+      })
+    );
+  }
+
   async function saveRepo(path: string): Promise<string> {
     return await withLoading("repos.save", () =>
       invoke<string>("save_repository", {
@@ -60,6 +78,8 @@ export function useGitApi() {
 
   return {
     getGitStatus,
+    gitSnapshot,
+    gitCommit,
     getRepoConfig,
     verifyRepo,
     saveRepo,

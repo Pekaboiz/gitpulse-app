@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { invoke } from "@tauri-apps/api/core";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
-import { GitFileStatus, Repository, RepositoriesConfig } from "../features/git/model/gitTypes";
+import { GitFileStatus, Repository } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import { GitStatusButton } from "../features/git/components/GitStatusButton";
@@ -23,7 +22,7 @@ const ReposPage = () => {
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
   const {isAnyLoading} = useLoading();
-  const { getGitStatus, getRepoConfig, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
+  const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
 
   useEffect(() => {
     loadRepositories();
@@ -117,9 +116,7 @@ const ReposPage = () => {
     }
 
     try {
-      setRepoCommitMsg(await invoke("git_snapshot", {
-        repositoryPath: repoPath
-      }));
+      setRepoCommitMsg(await gitSnapshot(repoPath));
 
       setRepoError("");
       await handleGitStatus();
@@ -141,13 +138,7 @@ const ReposPage = () => {
     }
 
     try {
-      console.log(files);
-
-      setRepoCommitMsg(await invoke("git_commit", {
-        repositoryPath: repoPath,
-        message: commitMessage.trim(),
-        files : files,
-      }));
+      setRepoCommitMsg(await gitCommit(repoPath, commitMessage, files));
 
       setRepoError("");
       await handleGitStatus();
