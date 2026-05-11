@@ -4,7 +4,6 @@ import { parseGitStatus } from "../features/git/model/gitStatusParser";
 import { GitFileStatus, Repository } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
-import { GitStatusButton } from "../features/git/components/GitStatusButton";
 import Button from "../shared/components/UI/Button";
 import GitProjectsList from "../features/git/components/GitProjectsList";
 import GitSnapshot from "../features/git/components/GitSnapshot";
@@ -21,7 +20,7 @@ const ReposPage = () => {
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
-  const {isAnyLoading} = useLoading();
+  const {isAnyLoading, isLoading} = useLoading();
   const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
 
   useEffect(() => {
@@ -29,11 +28,22 @@ const ReposPage = () => {
   }, []);
 
   const hasRepository = Boolean(repoPath);
+  const isCommitDisabled =
+    !hasRepository ||
+    isLoading("git.commit");
+
+  const isSnapshotDisabled =
+    !hasRepository ||
+    isLoading("git.snapshot");
+
+  const isStatusDisabled =
+    !hasRepository ||
+    isLoading("git.status");
 
   const toggleFile = (fileName : string) => {
     setFiles((currentFiles) => 
       currentFiles.map((file) => 
-        file.file == fileName 
+        file.file === fileName 
     ? {...file, checked: !file.checked} 
     : file))
   }
@@ -76,7 +86,6 @@ const ReposPage = () => {
       const parsedFiles = parseGitStatus(output);
 
       const visibleFiles = [];
-      console.log(parsedFiles);
       for (const file of parsedFiles) {
         const ignored = await isGitIgnored(repoPath, file);
 
@@ -183,7 +192,7 @@ const ReposPage = () => {
 
           <GitSnapshot onClick={commitSnapshot}/>
           <GitCommit onClick={commitRepo}/>
-          <GitStatusButton onClick={handleGitStatus} />
+          <Button disabled={isStatusDisabled} onClick={handleGitStatus} label="Git Status"/>
           {repoCommitMsg ? 
             (
               <p>

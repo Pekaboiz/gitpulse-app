@@ -1,11 +1,12 @@
 type Props = {
     onClick: () => void;
     label : string;
+    disabled? : boolean;
 }
 
-function Button({onClick, label} : Props) {
+function Button({onClick, label, disabled} : Props) {
   return (
-    <button onClick={onClick}>{label}</button>
+    <button disabled={disabled} onClick={onClick}>{label}</button>
   )
 }
 

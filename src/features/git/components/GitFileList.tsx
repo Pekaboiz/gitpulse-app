@@ -3,7 +3,7 @@ import { formatStatus } from '../model/gitStatusParser';
 
 type Props = {
   files: GitFileStatus[];
-  onToggle : (file_name : string) => void;
+  onToggle : (fileName : string) => void;
 };
 
 function GitFileList( {files, onToggle} : Props ) {
