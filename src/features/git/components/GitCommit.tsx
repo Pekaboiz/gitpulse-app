@@ -3,9 +3,10 @@ import Button from "../../../shared/components/UI/Button";
 
 type Props = {
   onClick: (commitMsg: string) => void | Promise<void>;
+  disabled? : boolean;
 };
 
-function GitCommit({ onClick }: Props) {
+function GitCommit({ disabled, onClick }: Props) {
   const [commitMsg, setCommitMsg] = useState("");
 
   const handleCommit = async () => {
@@ -28,7 +29,7 @@ function GitCommit({ onClick }: Props) {
         placeholder="commit message"
       />
 
-      <Button onClick={handleCommit} label="Commit changes" />
+      <Button disabled={disabled} onClick={handleCommit} label="Commit changes" />
     </div>
   );
 }

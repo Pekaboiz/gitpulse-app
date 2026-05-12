@@ -28,6 +28,7 @@ const ReposPage = () => {
   }, []);
 
   const hasRepository = Boolean(repoPath);
+  
   const isCommitDisabled =
     !hasRepository ||
     isLoading("git.commit");
@@ -186,25 +187,23 @@ const ReposPage = () => {
         onSelect={selectSavedRepository}
       />
 
-      {hasRepository && (
-        <div className="repo_item">
-          <p>Actions</p>
+      <div className="repo_item">
+        <p>Actions</p>
 
-          <GitSnapshot  onClick={commitSnapshot}/>
-          <GitCommit onClick={commitRepo}/>
-          <Button disabled={isStatusDisabled} onClick={handleGitStatus} label="Git Status"/>
-          {repoCommitMsg ? 
-            (
-              <p>
-                {repoCommitMsg}
-              </p>
-            ) 
-            : 
-            <GitFileList onToggle={toggleFile} files={files} />
-          }
-          
-        </div>
-      )}
+        <GitSnapshot disabled={isSnapshotDisabled} onClick={commitSnapshot}/>
+        <GitCommit disabled={isCommitDisabled} onClick={commitRepo}/>
+        <Button disabled={isStatusDisabled} onClick={handleGitStatus} label="Git Status"/>
+        {repoCommitMsg ? 
+          (
+            <p>
+              {repoCommitMsg}
+            </p>
+          ) 
+          : 
+          <GitFileList onToggle={toggleFile} files={files} />
+        }
+        
+      </div>
 
       {repoError && (
         <p style={{ color: "red" }}>
