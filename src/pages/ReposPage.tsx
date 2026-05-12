@@ -27,6 +27,12 @@ const ReposPage = () => {
     loadRepositories();
   }, []);
 
+  useEffect(() => {
+    if (hasRepository) {
+      handleGitStatus(repoPath);
+    }
+  }, [repoPath]);
+
   const hasRepository = Boolean(repoPath);
   
   const isCommitDisabled =
@@ -58,7 +64,7 @@ const ReposPage = () => {
     }
   };
 
-  const selectSavedRepository = (repository: Repository) => {
+  const selectSavedRepository = async (repository: Repository) => {
     setRepoPath(repository.path);
     resetRepositoryData();
   };
@@ -76,19 +82,20 @@ const ReposPage = () => {
     setRepoError(getErrorMessage(error));
   };
 
-  const handleGitStatus = async () => {
-    if (!repoPath) {
+  const handleGitStatus = async (path = repoPath) => {
+    if (!path) {
       setRepoError("Сначала выбери Git-репозиторий");
       return;
     }
 
     try {
-      const output = await getGitStatus(repoPath);
+      const output = await getGitStatus(path);
       const parsedFiles = parseGitStatus(output);
 
-      const visibleFiles = [];
+      const visibleFiles: GitFileStatus[] = [];
+
       for (const file of parsedFiles) {
-        const ignored = await isGitIgnored(repoPath, file);
+        const ignored = await isGitIgnored(path, file);
 
         if (!ignored) {
           visibleFiles.push(file);
@@ -102,7 +109,7 @@ const ReposPage = () => {
       setRepoError(getErrorMessage(error));
     }
   };
-
+  
   const selectRepo = async () => {
     const selectedPath = await open({
       directory: true,
@@ -121,6 +128,8 @@ const ReposPage = () => {
 
       setRepoPath(verifiedPath);
       resetRepositoryData();
+
+      await handleGitStatus(verifiedPath);
     } catch (error) {
       setRepoCommitMsg("");
       clearRepository(error);
@@ -137,7 +146,7 @@ const ReposPage = () => {
       setRepoCommitMsg(await gitSnapshot(repoPath));
 
       setRepoError("");
-      await handleGitStatus();
+      await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
@@ -159,7 +168,7 @@ const ReposPage = () => {
       setRepoCommitMsg(await gitCommit(repoPath, commitMessage, files));
 
       setRepoError("");
-      await handleGitStatus();
+      await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
