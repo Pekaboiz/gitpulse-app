@@ -190,7 +190,7 @@ const ReposPage = () => {
         <div className="repo_item">
           <p>Actions</p>
 
-          <GitSnapshot onClick={commitSnapshot}/>
+          <GitSnapshot  onClick={commitSnapshot}/>
           <GitCommit onClick={commitRepo}/>
           <Button disabled={isStatusDisabled} onClick={handleGitStatus} label="Git Status"/>
           {repoCommitMsg ? 

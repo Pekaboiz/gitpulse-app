@@ -6,13 +6,9 @@ type Props = {
 
 function GitSnapshot({ onClick }: Props) {
 
-  const handleCommit = async () => {
-    await onClick();
-  };
-
   return (
     <div>
-      <Button onClick={handleCommit} label="Snapshot" />
+      <Button onClick={onClick} label="Snapshot" />
     </div>
   );
 }
