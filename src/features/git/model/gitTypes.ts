@@ -27,7 +27,7 @@ export type ActiveRepositoryValue = {
 export type Repository = {
   path: string;
   name: string;
-
+  updated_at: string;
 };
 
 export type RepositoriesConfig = {

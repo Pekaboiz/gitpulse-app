@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { open } from "@tauri-apps/plugin-dialog";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
 import { GitFileStatus, Repository } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
-import Button from "../shared/components/UI/Button";
 import GitSnapshot from "../features/git/components/GitSnapshot";
 import { useLoading } from "../features/git/hooks/LoaderStates";
 import { useGitApi } from "../features/git/api";
@@ -16,13 +14,13 @@ const getErrorMessage = (error: unknown): string => {
 
 const ReposPage = () => {
   const [files, setFiles] = useState<GitFileStatus[]>([]);
-  const [repos, setRepos] = useState<Repository[]>([]);
+  const [_, setRepos] = useState<Repository[]>([]);
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
   const {isAnyLoading, isLoading} = useLoading();
   const {activeRepo} = useActiveRepo();
-  const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
+  const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, saveRepo} = useGitApi();
 
   useEffect(() => {
     loadRepositories();
@@ -33,16 +31,11 @@ const ReposPage = () => {
       if (activeRepo) {
         saveRepo(activeRepo.path)
         setRepoPath(activeRepo.path);
+        handleGitStatus(activeRepo.path);
         resetRepositoryData();
       }
     }
   }, [activeRepo]);
-
-  useEffect(() => {
-    if (hasRepository) {
-      handleGitStatus(repoPath);
-    }
-  }, [repoPath]);
 
   const hasRepository = Boolean(repoPath);
   
@@ -54,9 +47,9 @@ const ReposPage = () => {
     !hasRepository ||
     isLoading("git.snapshot");
 
-  const isStatusDisabled =
-    !hasRepository ||
-    isLoading("git.status");
+  // const isStatusDisabled =
+  //   !hasRepository ||
+  //   isLoading("git.status");
 
   const toggleFile = (fileName : string) => {
     setFiles((currentFiles) => 
@@ -79,13 +72,6 @@ const ReposPage = () => {
     setFiles([]);
     setRepoError("")
     setRepoCommitMsg("");
-  };
-
-  const clearRepository = (error: unknown) => {
-    setRepoPath("");
-    setFiles([]);
-    setRepoCommitMsg("");
-    setRepoError(getErrorMessage(error));
   };
 
   const handleGitStatus = async (path = repoPath) => {
@@ -116,32 +102,6 @@ const ReposPage = () => {
     }
   };
   
-  const selectRepo = async () => {
-    const selectedPath = await open({
-      directory: true,
-      multiple: false,
-      title: "Выбери Git-репозиторий",
-    });
-
-    if (typeof selectedPath !== "string") {
-      return;
-    }
-
-    try {
-      const verifiedPath = await verifyRepo(selectedPath);
-
-      await saveRepo(verifiedPath);
-
-      setRepoPath(verifiedPath);
-      resetRepositoryData();
-
-      //await handleGitStatus(verifiedPath);
-    } catch (error) {
-      setRepoCommitMsg("");
-      clearRepository(error);
-    }
-  };
-
   const commitSnapshot = async () => {
     if (!repoPath) {
       setRepoError("Сначала выбери Git-репозиторий");
@@ -185,24 +145,11 @@ const ReposPage = () => {
     <div>
       <h1>Git Pulse</h1>
       {isAnyLoading && <p>loading</p>}
-      <div>
-        <input
-          id="git_input"
-          className="git_input"
-          value={repoPath ? `~${repoPath}` : ""}
-          placeholder="~/chosen_path"
-          readOnly
-        />
-
-        <Button onClick={selectRepo} label="Choose repository" />
-      </div>
-
       <div className="repo_item">
         <p>Actions</p>
 
         <GitSnapshot disabled={isSnapshotDisabled} onClick={commitSnapshot}/>
         <GitCommit disabled={isCommitDisabled} onClick={commitRepo}/>
-        <Button disabled={isStatusDisabled} onClick={() => handleGitStatus(repoPath)} label="Git Status"/>
         {repoCommitMsg ? 
           (
             <p>

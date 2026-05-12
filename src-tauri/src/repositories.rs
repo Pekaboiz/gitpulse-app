@@ -45,8 +45,6 @@ pub async fn save_repository(
                                                .iter_mut()
                                                .find(|repository| repository.path == repository_path) 
     {
-        println!("{:?}", repository);
-
         repository.updated_at =chrono::Utc::now().to_rfc3339();
     } else {
         config.repositories.push(Repository {
@@ -54,7 +52,6 @@ pub async fn save_repository(
             path: repository_path,
             updated_at: chrono::Utc::now().to_rfc3339(),
         });
-        println!("{:?}", config);
     }
 
     let json = serde_json::to_string_pretty(&config)
