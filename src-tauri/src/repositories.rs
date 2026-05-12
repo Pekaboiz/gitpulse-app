@@ -40,16 +40,21 @@ pub async fn save_repository(
         RepositoriesConfig::default()
     };
 
-    let already_exists = config
-        .repositories
-        .iter()
-        .any(|repository| repository.path == repository_path);
+    if let Some(repository) = config
+                                               .repositories
+                                               .iter_mut()
+                                               .find(|repository| repository.path == repository_path) 
+    {
+        println!("{:?}", repository);
 
-    if !already_exists {
+        repository.updated_at =chrono::Utc::now().to_rfc3339();
+    } else {
         config.repositories.push(Repository {
             name: get_repo_name(repository_path.clone())?,
             path: repository_path,
+            updated_at: chrono::Utc::now().to_rfc3339(),
         });
+        println!("{:?}", config);
     }
 
     let json = serde_json::to_string_pretty(&config)

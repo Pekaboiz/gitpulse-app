@@ -1,4 +1,3 @@
-//test
 export type GitFileStatus = {
     status : string,
     file : string,
@@ -20,9 +19,15 @@ export type ActiveTabContextValue = {
   setActiveTab: (tab: Tab) => void;
 };
 
+export type ActiveRepositoryValue = {
+  activeRepo: Repository | null;
+  setActiveRepo: (repo: Repository) => void;
+};
+
 export type Repository = {
   path: string;
   name: string;
+
 };
 
 export type RepositoriesConfig = {

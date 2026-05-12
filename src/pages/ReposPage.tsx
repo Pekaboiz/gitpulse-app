@@ -25,7 +25,7 @@ const ReposPage = () => {
 
   useEffect(() => {
     loadRepositories();
-  }, []);
+  }, [files]);
 
   useEffect(() => {
     if (hasRepository) {
@@ -64,9 +64,12 @@ const ReposPage = () => {
     }
   };
 
-  const selectSavedRepository = async (repository: Repository) => {
-    setRepoPath(repository.path);
-    resetRepositoryData();
+  const selectSavedRepository = async (repo: Repository) => {
+    if (repo.path != repoPath) {
+      saveRepo(repo.path)
+      setRepoPath(repo.path);
+      resetRepositoryData();
+    }
   };
 
   const resetRepositoryData = () => {
@@ -129,7 +132,7 @@ const ReposPage = () => {
       setRepoPath(verifiedPath);
       resetRepositoryData();
 
-      await handleGitStatus(verifiedPath);
+      //await handleGitStatus(verifiedPath);
     } catch (error) {
       setRepoCommitMsg("");
       clearRepository(error);
@@ -144,9 +147,9 @@ const ReposPage = () => {
 
     try {
       setRepoCommitMsg(await gitSnapshot(repoPath));
-
+      setRepoPath(repoPath);
       setRepoError("");
-      await handleGitStatus(repoPath);
+      //await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
@@ -166,9 +169,9 @@ const ReposPage = () => {
 
     try {
       setRepoCommitMsg(await gitCommit(repoPath, commitMessage, files));
-
+      setRepoPath(repoPath);
       setRepoError("");
-      await handleGitStatus(repoPath);
+      //await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
@@ -194,6 +197,7 @@ const ReposPage = () => {
       <GitProjectsList
         repositories={repos}
         onSelect={selectSavedRepository}
+        limit={2}
       />
 
       <div className="repo_item">
@@ -201,7 +205,7 @@ const ReposPage = () => {
 
         <GitSnapshot disabled={isSnapshotDisabled} onClick={commitSnapshot}/>
         <GitCommit disabled={isCommitDisabled} onClick={commitRepo}/>
-        <Button disabled={isStatusDisabled} onClick={handleGitStatus} label="Git Status"/>
+        <Button disabled={isStatusDisabled} onClick={() => handleGitStatus(repoPath)} label="Git Status"/>
         {repoCommitMsg ? 
           (
             <p>
