@@ -5,10 +5,10 @@ import { GitFileStatus, Repository } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import Button from "../shared/components/UI/Button";
-import GitProjectsList from "../features/git/components/GitProjectsList";
 import GitSnapshot from "../features/git/components/GitSnapshot";
 import { useLoading } from "../features/git/hooks/LoaderStates";
 import { useGitApi } from "../features/git/api";
+import { useActiveRepo } from "../features/git/hooks/ActiveRepository";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -21,11 +21,22 @@ const ReposPage = () => {
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
   const {isAnyLoading, isLoading} = useLoading();
+  const {activeRepo} = useActiveRepo();
   const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, verifyRepo, saveRepo} = useGitApi();
 
   useEffect(() => {
     loadRepositories();
   }, [files]);
+
+  useEffect(() => {
+    if (repoPath.length == 0) {
+      if (activeRepo) {
+        saveRepo(activeRepo.path)
+        setRepoPath(activeRepo.path);
+        resetRepositoryData();
+      }
+    }
+  }, [activeRepo]);
 
   useEffect(() => {
     if (hasRepository) {
@@ -61,14 +72,6 @@ const ReposPage = () => {
       setRepos(config.repositories);
     } catch (error) {
       setRepoError(getErrorMessage(error));
-    }
-  };
-
-  const selectSavedRepository = async (repo: Repository) => {
-    if (repo.path != repoPath) {
-      saveRepo(repo.path)
-      setRepoPath(repo.path);
-      resetRepositoryData();
     }
   };
 
@@ -193,12 +196,6 @@ const ReposPage = () => {
 
         <Button onClick={selectRepo} label="Choose repository" />
       </div>
-
-      <GitProjectsList
-        repositories={repos}
-        onSelect={selectSavedRepository}
-        limit={2}
-      />
 
       <div className="repo_item">
         <p>Actions</p>

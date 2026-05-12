@@ -4,10 +4,12 @@ import { useActiveTab } from "../features/git/hooks/ActiveTabContext";
 import { TABS } from "../features/git/model/gitTypes";
 import { Repository } from "../features/git/model/gitTypes";
 import { useGitApi } from "../features/git/api";
+import { useActiveRepo } from "../features/git/hooks/ActiveRepository";
 
 const Dashboard = () => {
   const {setActiveTab} = useActiveTab();
   const [repos, setRepos] = useState<Repository[]>([]);
+  const {activeRepo, setActiveRepo} = useActiveRepo();
   const {getRepoConfig} = useGitApi();
   
   useEffect(() => {
@@ -22,6 +24,13 @@ const Dashboard = () => {
       console.log(error);
     }
   };
+
+  const selectSavedRepository = async (repo: Repository) => {
+    if (repo.path != activeRepo?.path) {
+      setActiveRepo(repo);
+    }
+    setActiveTab(TABS.REPOS_PAGE);
+  };
     
   return (
     <div>
@@ -29,9 +38,8 @@ const Dashboard = () => {
         <h1>Your active repositories: 5</h1>
         <GitProjectsList
           repositories={repos}
-          onSelect={() => {console.log("click")}}
+          onSelect={selectSavedRepository}
         />
-        <button onClick={() => {setActiveTab(TABS.REPOS_PAGE)}}>show more..</button>
       </div>
     </div>
   )
