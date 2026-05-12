@@ -16,14 +16,17 @@ const Dashboard = () => {
   const { getRepoConfig, verifyRepo, saveRepo} = useGitApi();
   
   useEffect(() => {
-      loadRepositories();``
+      loadRepositories();
     }, []);
   
   const loadRepositories = async () => {
     try {
       const configRaw = await getRepoConfig();
 
-      const config = configRaw.repositories.filter((el) => el.updated_at).sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+      const config = configRaw
+                     .repositories
+                     .filter((el) => el.updated_at)
+                     .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
 
       setRepos(config);
     } catch (error) {
