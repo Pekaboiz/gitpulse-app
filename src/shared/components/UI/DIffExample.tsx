@@ -13,7 +13,7 @@ function DiffExample() {
     `;
 
   const diffHtml = html(diff, {
-    drawFileList: false,
+    drawFileList: true,
     matching: 'lines',
     outputFormat: 'line-by-line',
   });
