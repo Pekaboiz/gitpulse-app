@@ -1,5 +1,5 @@
-import { useActiveTab } from "../hooks/ActiveTabContext";
-import { Tab, TABS } from "../model/gitTypes";
+import { useActiveTab } from "../../../features/git/hooks/ActiveTabContext";
+import { Tab, TABS } from "../../../features/git/model/gitTypes";
 
 type Props = {
   onClick: (tab_name : Tab) => void;
