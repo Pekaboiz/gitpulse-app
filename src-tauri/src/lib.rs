@@ -19,6 +19,7 @@ pub fn run() {
             git::git_snapshot,
             git::git_commit,
             git::git_status,
+            history::get_hist_cfg,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

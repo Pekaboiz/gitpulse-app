@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { GitFileStatus, LoadingKey, RepositoriesConfig } from "./model/gitTypes";
+import { GitFileStatus, HistoryConfig, LoadingKey, RepositoriesConfig } from "./model/gitTypes";
 import { useLoading } from "./hooks/LoaderStates";
 
 export function useGitApi() {
@@ -76,6 +76,10 @@ export function useGitApi() {
     });
   }
 
+  async function getHistory(): Promise<HistoryConfig> {
+    return await invoke<HistoryConfig>("get_hist_cfg");
+  }
+
   return {
     getGitStatus,
     gitSnapshot,
@@ -84,5 +88,6 @@ export function useGitApi() {
     verifyRepo,
     saveRepo,
     isGitIgnored,
+    getHistory,
   };
 }

@@ -29,6 +29,12 @@ pub enum ActionType {
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
+pub struct HistoryConfig {
+    pub hist_config: Vec<HistoryItem>
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
 pub struct HistoryItem {
     pub action_type: ActionType,
     pub repo_path: String,

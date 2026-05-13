@@ -34,11 +34,31 @@ export type RepositoriesConfig = {
   repositories: Repository[];
 };
 
-export type LoadingKey = "repos.load" | "repos.save" | "repos.verfy" | "git.status" | "git.commit" | "git.snapshot";
+export type LoadingKey = "hist.load" | "repos.load" | "repos.save" | "repos.verfy" | "git.status" | "git.commit" | "git.snapshot";
 
 export type LoadingContextValue = {
     loading : Partial<Record<LoadingKey, boolean>>
     setLoading : (key : LoadingKey, value : boolean) => void;
     isLoading : (key : LoadingKey) => boolean;
     isAnyLoading : boolean;
+}
+
+// history
+
+enum ActionType {
+  Commit,
+  Snapshot,
+  StatusCheck,
+}
+
+type HistoryItem = {
+  actionType  : ActionType;
+  repoPath    : string;
+  message     : string;
+  fileCount   : number;
+  createdAt   : Date;
+}
+
+export type HistoryConfig = {
+  histConfig : HistoryItem[];
 }
