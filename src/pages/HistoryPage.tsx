@@ -11,7 +11,7 @@ function HistoryPage() {
   useEffect(() => {
     loadHistory();
     console.log(getHistory());
-  }, [history]);
+  }, []);
 
   async function loadHistory() {
     const history = await getHistory();

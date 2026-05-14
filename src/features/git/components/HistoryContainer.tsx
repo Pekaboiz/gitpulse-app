@@ -10,8 +10,8 @@ function HistoryContainer({config} : Props) {
         {
             config?.histConfig
                 .sort((a,b) => {return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()})
-                .map((el) => (
-                <div className="history_item">
+                .map((el, index) => (
+                <div className="history_item" key={index}>
                     <div className="status">{el.actionType}</div>
                     <div className="message">{el.message}</div>
                     <div className="repo_path">{el.repoPath}</div>

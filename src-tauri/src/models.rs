@@ -28,17 +28,26 @@ pub enum ActionType {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct HistoryConfig {
+    #[serde(alias = "histConfig")]
     pub hist_config: Vec<HistoryItem>
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct HistoryItem {
+    #[serde(alias = "action_type")]
     pub action_type: ActionType,
+
+    #[serde(alias = "repo_path")]
     pub repo_path: String,
+
     pub message: String,
+
+    #[serde(alias = "file_count")]
     pub file_count: usize,
+
+    #[serde(alias = "created_at")]
     pub created_at: String,
 }
