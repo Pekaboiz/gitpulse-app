@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { parseGitStatus } from "../features/git/model/gitStatusParser";
-import { GitFileStatus, Repository } from "../features/git/model/gitTypes";
+import { GitFileStatus, Repository, GitDiff } from "../features/git/model/gitTypes";
 import GitFileList from "../features/git/components/GitFileList";
 import GitCommit from "../features/git/components/GitCommit";
 import GitSnapshot from "../features/git/components/GitSnapshot";
 import { useLoading } from "../features/git/hooks/LoaderStates";
 import { useGitApi } from "../features/git/api";
 import { useActiveRepo } from "../features/git/hooks/ActiveRepository";
+import { parseGitDiff } from "../features/git/model/gitDiffParser";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -18,7 +19,7 @@ const ReposPage = () => {
   const [repoPath, setRepoPath] = useState("");
   const [repoError, setRepoError] = useState("");
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
-  const {isAnyLoading, isLoading} = useLoading();
+  const {loading, isAnyLoading, isLoading} = useLoading();
   const {activeRepo} = useActiveRepo();
   const { getGitStatus, getGitDiff, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, saveRepo} = useGitApi();
 
@@ -46,11 +47,7 @@ const ReposPage = () => {
   const isSnapshotDisabled =
     !hasRepository ||
     isLoading("git.snapshot");
-
-  // const isStatusDisabled =
-  //   !hasRepository ||
-  //   isLoading("git.status");
-
+    
   const toggleFile = (fileName : string) => {
     setFiles((currentFiles) => 
       currentFiles.map((file) => 
@@ -98,6 +95,13 @@ const ReposPage = () => {
         const ignored = await isGitIgnored(path, file);
 
         if (!ignored) {
+          try {
+            const diff = await getGitDiff(repoPath, path);
+            file.diff = parseGitDiff(diff);
+          } catch (error) {
+            setRepoError(getErrorMessage(error));
+          }
+          
           visibleFiles.push(file);
         }
       }
@@ -124,7 +128,6 @@ const ReposPage = () => {
       setRepoCommitMsg(await gitSnapshot(repoPath));
       setRepoPath(repoPath);
       setRepoError("");
-      //await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
@@ -146,7 +149,6 @@ const ReposPage = () => {
       setRepoCommitMsg(await gitCommit(repoPath, commitMessage, files));
       setRepoPath(repoPath);
       setRepoError("");
-      //await handleGitStatus(repoPath);
     } catch (error) {
       setRepoCommitMsg("");
       setRepoError(getErrorMessage(error));
@@ -175,13 +177,11 @@ const ReposPage = () => {
           files={files}
           renderExpanded={(file) => (
             <div className="diff_info">
-              {file.diffLoading ? "Loading diff..." : <p>{file.diff?.oldFile}</p>}
+              {loading["git.diff"] ? "Loading diff..." : <p>{file.diff?.oldFile}</p>}
             </div>
           )}
         />
-
         }
-        
       </div>
 
       {repoError && (

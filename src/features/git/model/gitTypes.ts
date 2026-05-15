@@ -4,8 +4,6 @@ export type GitFileStatus = {
   checked: boolean;
   expanded: boolean;
   diff?: GitDiff;
-  diffLoading?: boolean;
-  diffError?: string;
 };
 
 export type GitDiff = {
@@ -29,7 +27,6 @@ export type GitDiffLine = {
   oldLineNumber?: number;
   newLineNumber?: number;
 };
-
 
 export const TABS = {
   DASHBOARD_PAGE: "/",

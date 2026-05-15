@@ -26,8 +26,13 @@ export function useGitApi() {
     );
   }
 
-  async function getGitDiff(path: string): Promise<string>  {
-    return await path;
+  async function getGitDiff(path: string, filePath: string): Promise<string>  {
+    return await withLoading("git.diff", () =>
+      invoke<string>("git_diff", {
+        repositoryPath: path,
+        filePath: filePath,
+      })
+    );
   }
 
   async function getRepoConfig(): Promise<RepositoriesConfig> {

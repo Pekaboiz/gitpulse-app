@@ -8,6 +8,7 @@ type Props = {
 function GitSnapshot({ disabled, onClick }: Props) {
 
   return (
+    
       <Button disabled={disabled} onClick={onClick} label="Snapshot" />
   );
 }

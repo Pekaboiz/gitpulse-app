@@ -8,7 +8,8 @@ return output
         const status = line.slice(0, 2).trim();
         const file = line.slice(3);
         const checked = true;
-        return{status, file, checked};
+        const expanded = false;
+        return{status, file, checked, expanded};
         });
 }
 

@@ -1,4 +1,3 @@
-import DiffExample from '../shared/components/UI/DIffExample'
 import { useGitApi } from '../features/git/api';
 import { useEffect, useState } from 'react';
 import { HistoryConfig } from '../features/git/model/gitTypes';
@@ -21,7 +20,6 @@ function HistoryPage() {
   return (
     <div>
       <HistoryContainer config={history}/>
-      <DiffExample/>
     </div>
   )
 }
