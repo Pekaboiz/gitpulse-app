@@ -26,6 +26,10 @@ export function useGitApi() {
     );
   }
 
+  async function getGitDiff(path: string): Promise<string>  {
+    return await path;
+  }
+
   async function getRepoConfig(): Promise<RepositoriesConfig> {
     return await withLoading("repos.load", () =>
       invoke<RepositoriesConfig>("get_repositories")
@@ -83,6 +87,7 @@ export function useGitApi() {
   return {
     getGitStatus,
     gitSnapshot,
+    getGitDiff,
     gitCommit,
     getRepoConfig,
     verifyRepo,

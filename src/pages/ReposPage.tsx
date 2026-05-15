@@ -20,7 +20,7 @@ const ReposPage = () => {
   const [repoCommitMsg, setRepoCommitMsg] = useState<string>("");
   const {isAnyLoading, isLoading} = useLoading();
   const {activeRepo} = useActiveRepo();
-  const { getGitStatus, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, saveRepo} = useGitApi();
+  const { getGitStatus, getGitDiff, gitSnapshot, getRepoConfig, gitCommit, isGitIgnored, saveRepo} = useGitApi();
 
   useEffect(() => {
     loadRepositories();
@@ -59,6 +59,14 @@ const ReposPage = () => {
     : file))
   }
 
+  const expandDiff = (fileName : string) => {
+    setFiles((currentFiles) => 
+      currentFiles.map((file) => 
+        file.file === fileName 
+    ? {...file, expanded: !file.expanded} 
+    : file))
+  }
+
   const loadRepositories = async () => {
     try {
       const config = await getRepoConfig();
@@ -94,7 +102,7 @@ const ReposPage = () => {
         }
       }
 
-      setFiles(visibleFiles);
+      updateFilesData(visibleFiles);
       setRepoError("");
     } catch (error) {
       setRepoCommitMsg("");
@@ -102,6 +110,10 @@ const ReposPage = () => {
     }
   };
   
+  const updateFilesData = async (dataFiles : GitFileStatus[]) => {
+    setFiles(dataFiles)
+  }
+
   const commitSnapshot = async () => {
     if (!repoPath) {
       setRepoError("Сначала выбери Git-репозиторий");
@@ -157,7 +169,17 @@ const ReposPage = () => {
             </p>
           ) 
           : 
-          <GitFileList onToggle={toggleFile} files={files} />
+          <GitFileList
+          onClick={expandDiff}
+          onToggle={toggleFile}
+          files={files}
+          renderExpanded={(file) => (
+            <div className="diff_info">
+              {file.diffLoading ? "Loading diff..." : <p>{file.diff?.oldFile}</p>}
+            </div>
+          )}
+        />
+
         }
         
       </div>

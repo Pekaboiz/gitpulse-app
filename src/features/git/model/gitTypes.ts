@@ -1,8 +1,35 @@
 export type GitFileStatus = {
-    status : string,
-    file : string,
-    checked : boolean,
-}
+  status: string;
+  file: string;
+  checked: boolean;
+  expanded: boolean;
+  diff?: GitDiff;
+  diffLoading?: boolean;
+  diffError?: string;
+};
+
+export type GitDiff = {
+  oldFile?: string;
+  newFile?: string;
+  hunks: GitDiffHunk[];
+};
+
+export type GitDiffHunk = {
+  oldStart: number;
+  oldLines: number;
+  newStart: number;
+  newLines: number;
+  header?: string;
+  lines: GitDiffLine[];
+};
+
+export type GitDiffLine = {
+  type: "context" | "added" | "removed";
+  content: string;
+  oldLineNumber?: number;
+  newLineNumber?: number;
+};
+
 
 export const TABS = {
   DASHBOARD_PAGE: "/",
@@ -34,7 +61,7 @@ export type RepositoriesConfig = {
   repositories: Repository[];
 };
 
-export type LoadingKey = "hist.load" | "repos.load" | "repos.save" | "repos.verfy" | "git.status" | "git.commit" | "git.snapshot";
+export type LoadingKey = "hist.load" | "repos.load" | "repos.save" | "repos.verfy" | "git.status" | "git.commit" | "git.snapshot" | "git.diff";
 
 export type LoadingContextValue = {
     loading : Partial<Record<LoadingKey, boolean>>

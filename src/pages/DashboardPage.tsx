@@ -60,7 +60,6 @@ const Dashboard = () => {
 
   const selectSavedRepository = async (repo: Repository) => {
     if (repo.path != activeRepo?.path) {
-      console.log(repo);
       setActiveRepo(repo);
     }
     setActiveTab(TABS.REPOS_PAGE);
