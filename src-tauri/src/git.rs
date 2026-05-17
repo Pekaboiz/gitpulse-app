@@ -18,7 +18,7 @@ fn run_git_command(repository_path: &str, args: &[&str]) -> Result<String, Strin
         .args(args)
         .output()
         .map_err(|error| error.to_string())?;
-
+    
     if !output.status.success() {
         return Err(stderr_to_string(&output.stderr));
     }
@@ -162,7 +162,7 @@ pub fn git_status(repository_path: String) -> Result<String, String> {
 
 #[tauri::command]
 pub fn git_diff(repository_path: &str, file_path : &str) -> Result<String, String> {
-    run_git_command(repository_path, &["--", file_path])
+    run_git_command(repository_path, &["diff", "--", file_path])
 }
 
 #[tauri::command]

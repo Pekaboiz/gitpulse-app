@@ -27,6 +27,8 @@ export function useGitApi() {
   }
 
   async function getGitDiff(path: string, filePath: string): Promise<string>  {
+    console.log("api.rs::path - ", path, " api.rs::filePath - ", filePath);
+
     return await withLoading("git.diff", () =>
       invoke<string>("git_diff", {
         repositoryPath: path,

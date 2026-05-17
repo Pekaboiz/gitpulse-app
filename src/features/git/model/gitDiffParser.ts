@@ -1,6 +1,7 @@
 import { GitDiff, GitDiffHunk } from "./gitTypes";
 
 export function parseGitDiff(output: string): GitDiff {
+  console.log(output);
   const diff: GitDiff = { hunks: [] };
   const lines = output.split(/\r?\n/);
 
@@ -18,7 +19,8 @@ export function parseGitDiff(output: string): GitDiff {
     }
 
     const match = line.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(?: (.*))?$/);
-
+    console.log("match: ", match);
+    
     if (match) {
       currentHunk = {
         oldStart: Number(match[1]),

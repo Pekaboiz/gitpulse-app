@@ -8,6 +8,7 @@ import { useLoading } from "../features/git/hooks/LoaderStates";
 import { useGitApi } from "../features/git/api";
 import { useActiveRepo } from "../features/git/hooks/ActiveRepository";
 import { parseGitDiff } from "../features/git/model/gitDiffParser";
+import GitDiffContainer from "../features/git/components/GitDiff";
 
 const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
@@ -96,9 +97,10 @@ const ReposPage = () => {
 
         if (!ignored) {
           try {
-            const diff = await getGitDiff(repoPath, path);
+            const diff = await getGitDiff(activeRepo!.path, file.file);
             file.diff = parseGitDiff(diff);
           } catch (error) {
+            console.log(error);
             setRepoError(getErrorMessage(error));
           }
           
@@ -177,7 +179,7 @@ const ReposPage = () => {
           files={files}
           renderExpanded={(file) => (
             <div className="diff_info">
-              {loading["git.diff"] ? "Loading diff..." : <p>{file.diff?.oldFile}</p>}
+              {loading["git.diff"] ? "Loading diff..." : <GitDiffContainer diffChild={file.diff!}/>}
             </div>
           )}
         />

@@ -51,8 +51,6 @@ const Dashboard = () => {
       await saveRepo(verifiedPath);
 
       setRepoPath(verifiedPath);
-      //resetRepositoryData();
-      //await handleGitStatus(verifiedPath);
     } catch (error) {
       console.log(error)
     }
