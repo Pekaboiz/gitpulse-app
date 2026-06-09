@@ -10,27 +10,39 @@ type Props = {
 
 function GitFileList( {files, renderExpanded, onToggle, onClick} : Props ) {
   if (files.length === 0) {
-    return <p>Working tree clean</p>;
+    return <p className="empty_state">Working tree clean</p>;
   }
   
   return (
-    <ul>
+    <div className="file_table">
         {files.map((file) => {
-          
           const meta = formatStatus(file.status);
+          const additions = file.diff?.hunks.reduce((count, hunk) => (
+            count + hunk.lines.filter((line) => line.type === "added").length
+          ), 0) ?? 0;
+          const removals = file.diff?.hunks.reduce((count, hunk) => (
+            count + hunk.lines.filter((line) => line.type === "removed").length
+          ), 0) ?? 0;
+
           return (
-            <li onClick={() => onClick(file.file)} key={`${file.status}-${file.file}`}>
+            <div
+              className={`file_row ${file.checked ? "selected" : ""}`}
+              onClick={() => onClick(file.file)}
+              key={`${file.status}-${file.file}`}
+            >
               <input
                 type="checkbox"
                 checked={file.checked}
                 onClick={(event) => event.stopPropagation()}
                 onChange={() => onToggle(file.file)}
               />
-              <span className={`status ${meta.className}`}>{meta.label}</span> ~{file.file}
-              {file.expanded && renderExpanded?.(file)}
-            </li>)
+              <span className="file_name">{file.file}</span>
+              <span className={`status ${meta.className}`}>{meta.label.toLowerCase()}</span>
+              <span className="line_delta">+{additions} / -{removals}</span>
+              {file.expanded && <div className="diff_info">{renderExpanded?.(file)}</div>}
+            </div>)
       })}
-    </ul>
+    </div>
   )
 }
 
